@@ -1,0 +1,110 @@
+<UserControl x:Class="CoreWatch.Pages.PerformancePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:CoreWatch.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Performance" Style="{StaticResource T.Page}" />
+            <TextBlock x:Name="SubTitle" Style="{StaticResource T.Sub}" Margin="0,4,0,20" />
+
+            <!-- CPU -->
+            <Border Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="250" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="CpuPct" Style="{StaticResource T.Big}" Text="0%" Foreground="{StaticResource B.Cpu}" />
+                                <StackPanel Margin="14,0,0,5" VerticalAlignment="Bottom">
+                                    <TextBlock Text="Processor" Style="{StaticResource T.Card}" />
+                                    <TextBlock x:Name="CpuSpeed" Style="{StaticResource T.Label}" Text="—" />
+                                </StackPanel>
+                            </StackPanel>
+                            <TextBlock x:Name="ChartSpan" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                        </Grid>
+                        <c:LineChart x:Name="CpuChart" Height="200" />
+                    </DockPanel>
+                    <StackPanel x:Name="CpuStats" Grid.Column="2" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Cores -->
+            <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <TextBlock Text="Logical processors" Style="{StaticResource T.Card}" />
+                        <TextBlock x:Name="CoreSummary" Style="{StaticResource T.Label}" HorizontalAlignment="Right" />
+                    </Grid>
+                    <c:CoreTiles x:Name="Cores" Height="112" Color="{StaticResource C.Cpu}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Network + disk -->
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,4">
+                            <TextBlock Text="Network" Style="{StaticResource T.Card}" />
+                            <TextBlock x:Name="NetAdapter" Style="{StaticResource T.Label}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,12">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource B.Net}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Download" Style="{StaticResource T.Label}" Margin="7,0,0,0" />
+                                </StackPanel>
+                                <TextBlock x:Name="NetDown" FontSize="21" FontWeight="SemiBold" Text="—" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Margin="40,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource B.Cpu}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Upload" Style="{StaticResource T.Label}" Margin="7,0,0,0" />
+                                </StackPanel>
+                                <TextBlock x:Name="NetUp" FontSize="21" FontWeight="SemiBold" Text="—" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                        <c:LineChart x:Name="NetChart" Height="150" Maximum="0" MinAutoMaximum="51200" />
+                        <TextBlock x:Name="NetScale" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" FontSize="11" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,4">
+                            <TextBlock Text="Disk activity" Style="{StaticResource T.Card}" />
+                            <TextBlock x:Name="DiskActive" Style="{StaticResource T.Label}" HorizontalAlignment="Right" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,12">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource B.Disk}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Read" Style="{StaticResource T.Label}" Margin="7,0,0,0" />
+                                </StackPanel>
+                                <TextBlock x:Name="DiskRead" FontSize="21" FontWeight="SemiBold" Text="—" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Margin="40,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Fill="{StaticResource B.Vram}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Write" Style="{StaticResource T.Label}" Margin="7,0,0,0" />
+                                </StackPanel>
+                                <TextBlock x:Name="DiskWrite" FontSize="21" FontWeight="SemiBold" Text="—" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                        <c:LineChart x:Name="DiskChart" Height="150" Maximum="0" MinAutoMaximum="1048576" />
+                        <TextBlock x:Name="DiskScale" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" FontSize="11" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

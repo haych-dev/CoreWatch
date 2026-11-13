@@ -1,0 +1,101 @@
+<Window x:Class="CoreWatch.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CoreWatch" Width="1340" Height="880" MinWidth="1080" MinHeight="760"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource B.Window}" Foreground="{StaticResource B.Text}"
+        FontFamily="{StaticResource F.Ui}" FontSize="13"
+        UseLayoutRounding="True" SnapsToDevicePixels="True" Icon="Assets/app.ico">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="Root">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="228" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Navigation rail -->
+        <Border Background="{StaticResource B.Nav}" BorderBrush="{StaticResource B.Line}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="12,0,12,14">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Height="64" Margin="10,2,0,6">
+                    <Image Source="Assets/app.ico" Width="26" Height="26" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock Text="CoreWatch" FontFamily="{StaticResource F.Display}" FontSize="17" FontWeight="SemiBold" Margin="11,0,0,1" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom">
+                    <RadioButton x:Name="NavSettings" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE713;" Content="Settings" />
+                    <Border Margin="4,12,4,0" Padding="12,10" CornerRadius="8" Background="{StaticResource B.Card}" BorderBrush="{StaticResource B.Line}" BorderThickness="1"
+                            WindowChrome.IsHitTestVisibleInChrome="True">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="AdminDot" Width="7" Height="7" Fill="{StaticResource B.Faint}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="AdminText" Text="Standard user" Margin="8,0,0,0" FontSize="12" />
+                            </StackPanel>
+                            <TextBlock x:Name="MiniStats" Style="{StaticResource T.Label}" FontSize="11.5" Margin="0,6,0,0" Text="—" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False" WindowChrome.IsHitTestVisibleInChrome="True">
+                <StackPanel>
+                    <TextBlock Text="MONITOR" Style="{StaticResource T.Label}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource B.Faint}" Margin="14,4,0,6" />
+                    <RadioButton x:Name="NavDashboard" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE80F;" Content="Overview" />
+                    <RadioButton x:Name="NavPerformance" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE9D9;" Content="Performance" />
+                    <RadioButton x:Name="NavMemory" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE950;" Content="Memory" />
+                    <RadioButton x:Name="NavGpu" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE7F4;" Content="Graphics" />
+                    <RadioButton x:Name="NavProcesses" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE9F5;" Content="Processes" />
+                    <TextBlock Text="MAINTAIN" Style="{StaticResource T.Label}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource B.Faint}" Margin="14,18,0,6" />
+                    <RadioButton x:Name="NavStorage" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEDA2;" Content="Storage" />
+                    <RadioButton x:Name="NavCleaner" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEA99;" Content="Cleaner" />
+                    <RadioButton x:Name="NavStartup" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE7E8;" Content="Startup" />
+                    <RadioButton x:Name="NavTweaks" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEC4A;" Content="Tweaks" />
+                    <RadioButton x:Name="NavRegistry" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE90F;" Content="Registry" />
+                    <RadioButton x:Name="NavApps" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE71D;" Content="Apps" />
+                    <TextBlock Text="TOOLS" Style="{StaticResource T.Label}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource B.Faint}" Margin="14,18,0,6" />
+                    <RadioButton x:Name="NavInstall" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE896;" Content="Install" />
+                    <RadioButton x:Name="NavToolbox" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEC7A;" Content="Toolbox" />
+                </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Page host -->
+        <ContentControl x:Name="Host" Grid.Column="1" Margin="0,34,0,0" Focusable="False">
+            <ContentControl.RenderTransform><TranslateTransform x:Name="HostShift" /></ContentControl.RenderTransform>
+        </ContentControl>
+
+        <!-- Caption buttons -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" WindowChrome.IsHitTestVisibleInChrome="True">
+            <Button Style="{StaticResource Caption}" Content="&#xE921;" Click="Minimize_Click" ToolTip="Minimize" />
+            <Button x:Name="MaxButton" Style="{StaticResource Caption}" Content="&#xE922;" Click="Maximize_Click" />
+            <Button Style="{StaticResource CaptionClose}" Content="&#xE8BB;" Click="Close_Click" />
+        </StackPanel>
+
+        <!-- Toast -->
+        <Border x:Name="ToastBox" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,28" Padding="16,10"
+                CornerRadius="9" Background="#22252C" BorderBrush="{StaticResource B.Line}" BorderThickness="1" Opacity="0" IsHitTestVisible="False" MaxWidth="640">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="ToastIcon" Style="{StaticResource T.Icon}" Text="&#xE73E;" Foreground="{StaticResource B.Good}" Margin="0,0,10,0" />
+                <TextBlock x:Name="ToastText" TextWrapping="Wrap" MaxWidth="560" />
+            </StackPanel>
+        </Border>
+
+        <!-- Confirm dialog -->
+        <Grid x:Name="Dialog" Grid.ColumnSpan="2" Visibility="Collapsed" Background="#A0000000" WindowChrome.IsHitTestVisibleInChrome="True">
+            <Border Width="440" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24" CornerRadius="12"
+                    Background="{StaticResource B.Card}" BorderBrush="{StaticResource B.Line}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock x:Name="DialogTitle" FontFamily="{StaticResource F.Display}" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock x:Name="DialogBody" Style="{StaticResource T.Sub}" Margin="0,10,0,22" LineHeight="20" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="DialogCancel" Style="{StaticResource Btn}" Content="Cancel" MinWidth="92" Click="DialogCancel_Click" />
+                        <Button x:Name="DialogOk" Style="{StaticResource BtnPrimary}" Content="OK" MinWidth="92" Margin="10,0,0,0" Click="DialogOk_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

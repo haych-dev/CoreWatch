@@ -1,0 +1,180 @@
+<UserControl x:Class="CoreWatch.Pages.StoragePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:CoreWatch.Controls">
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Storage" Style="{StaticResource T.Page}" />
+            <TextBlock x:Name="SubTitle" Style="{StaticResource T.Sub}" Margin="0,4,0,20" Text="—" />
+
+            <!-- Volumes -->
+            <ItemsControl x:Name="DriveCards" Focusable="False" Margin="-6,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Loaded="DrivePanel_Loaded" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Margin="6,0,6,12">
+                            <StackPanel>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xEDA2;" Style="{StaticResource T.Icon}" Foreground="{StaticResource B.Disk}" FontSize="18" Margin="0,0,10,0" />
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource T.Card}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button Style="{StaticResource BtnGhost}" Content="Analyze" Foreground="{StaticResource B.Accent}" HorizontalAlignment="Right" Tag="{Binding Path}" Click="AnalyzeDrive_Click" Margin="0,-4,-8,-4" />
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <TextBlock Text="{Binding PctText}" FontFamily="{StaticResource F.Display}" FontSize="26" FontWeight="SemiBold" />
+                                    <TextBlock Text="used" Style="{StaticResource T.Label}" Margin="8,0,0,5" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                                <ProgressBar Value="{Binding Pct, Mode=OneWay}" Foreground="{Binding Bar}" Height="8" Margin="0,10,0,10" />
+                                <Grid>
+                                    <TextBlock Text="{Binding Detail}" Style="{StaticResource T.Label}" />
+                                    <TextBlock Text="{Binding Format}" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Physical disks -->
+            <Border x:Name="PhysCard" Style="{StaticResource Card}" Visibility="Collapsed" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Physical disks" Style="{StaticResource T.Card}" Margin="0,0,0,4" />
+                    <ItemsControl x:Name="PhysList" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,8,0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="110" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Kind}" Style="{StaticResource T.Label}" FontSize="13" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SizeText}" HorizontalAlignment="Right" />
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Ellipse Width="7" Height="7" Fill="{Binding HealthBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Health}" Margin="7,0,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Analyzer -->
+            <Border x:Name="AnalyzerCard" Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Space analyzer" Style="{StaticResource T.Card}" />
+                    <TextBlock Style="{StaticResource T.Sub}" Margin="0,4,0,14" Text="Scan a drive or folder to see exactly where the space went. Click a block to drill in." />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="PathBox" KeyDown="PathBox_KeyDown" />
+                        <Button Grid.Column="1" Style="{StaticResource Btn}" Content="Browse" Margin="10,0,0,0" Click="Browse_Click" />
+                        <Button x:Name="ScanButton" Grid.Column="2" Style="{StaticResource BtnPrimary}" Content="Scan" MinWidth="92" Margin="10,0,0,0" Click="Scan_Click" />
+                    </Grid>
+
+                    <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,16,0,0">
+                        <ProgressBar IsIndeterminate="True" Height="4" />
+                        <TextBlock x:Name="ProgressText" Margin="0,10,0,0" />
+                        <TextBlock x:Name="ProgressPath" Style="{StaticResource T.Label}" Margin="0,3,0,0" FontFamily="{StaticResource F.Mono}" FontSize="11.5" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="ResultPanel" Visibility="Collapsed" Margin="0,18,0,0">
+                        <Grid Margin="0,0,0,10">
+                            <ItemsControl x:Name="Crumbs" Focusable="False">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Style="{StaticResource BtnGhost}" Content="{Binding Name}" Tag="{Binding Node}" Click="Crumb_Click" Padding="6,4" FontWeight="SemiBold" />
+                                            <TextBlock Text="&#xE76C;" Style="{StaticResource T.Icon}" FontSize="9" Foreground="{StaticResource B.Faint}" Margin="2,1,2,0" Visibility="{Binding Chevron}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock x:Name="CurrentSummary" Style="{StaticResource T.Label}" VerticalAlignment="Center" />
+                                <Button Style="{StaticResource BtnIcon}" Content="&#xE838;" ToolTip="Open this folder in File Explorer" Margin="8,0,0,0" Click="OpenCurrent_Click" />
+                            </StackPanel>
+                        </Grid>
+
+                        <c:Treemap x:Name="Map" Height="300" />
+
+                        <Grid Margin="0,18,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="In this folder" Style="{StaticResource T.Card}" Margin="0,0,0,6" />
+                                <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" Focusable="False" PreviewMouseWheel="Inner_PreviewMouseWheel">
+                                    <ItemsControl x:Name="NodeList" Focusable="False">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource BtnGhost}" HorizontalContentAlignment="Stretch" Padding="8,7" Tag="{Binding Node}" Click="Node_Click" ToolTip="{Binding Tip}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="26" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="90" />
+                                                            <ColumnDefinition Width="52" />
+                                                            <ColumnDefinition Width="82" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Glyph}" Style="{StaticResource T.Icon}" FontSize="14" Foreground="{Binding GlyphBrush}" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{StaticResource B.Text}" Margin="0,0,10,0" />
+                                                        <ProgressBar Grid.Column="2" Value="{Binding Pct, Mode=OneWay}" Foreground="{StaticResource B.Disk}" VerticalAlignment="Center" Height="5" />
+                                                        <TextBlock Grid.Column="3" Text="{Binding ShareText}" Style="{StaticResource T.Label}" HorizontalAlignment="Right" />
+                                                        <TextBlock Grid.Column="4" Text="{Binding SizeText}" Foreground="{StaticResource B.Text}" HorizontalAlignment="Right" />
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Largest files in this scan" Style="{StaticResource T.Card}" Margin="0,0,0,6" />
+                                <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" Focusable="False" PreviewMouseWheel="Inner_PreviewMouseWheel">
+                                    <ItemsControl x:Name="FileList" Focusable="False">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="8,6,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="82" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel ToolTip="{Binding Path}">
+                                                        <TextBlock Text="{Binding Name}" />
+                                                        <TextBlock Text="{Binding Folder}" Style="{StaticResource T.Label}" FontSize="11.5" Margin="0,1,0,0" />
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,0">
+                                                        <Button Style="{StaticResource BtnIcon}" Content="&#xE838;" ToolTip="Show in File Explorer" Tag="{Binding}" Click="FileOpen_Click" />
+                                                        <Button Style="{StaticResource BtnIcon}" Content="&#xE74D;" ToolTip="Move to Recycle Bin" Tag="{Binding}" Click="FileDelete_Click" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
