@@ -4,6 +4,15 @@ A native Windows system manager: live monitoring of CPU, memory, GPU and disks, 
 
 ![Tweaks page](docs/tweaks.png)
 
+## Download
+
+Get the latest build from the [Releases page](https://github.com/haych-dev/CoreWatch/releases/latest):
+
+- **`CoreWatch-<version>-win-x64-standalone.exe`** runs on its own; nothing else to install.
+- **`CoreWatch-<version>-win-x64.exe`** is under 1 MB but needs the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+There is no installer: download the exe and run it. The exe is not code-signed, so Windows SmartScreen may show a warning the first time.
+
 ## What it does
 
 **Monitor**
