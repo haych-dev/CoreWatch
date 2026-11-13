@@ -1,0 +1,13 @@
+# Build output
+bin/
+obj/
+publish/
+
+# Local screenshots (may show the PC name, user paths and installed apps)
+screenshots/
+
+# Editor and OS files
+.vs/
+.vscode/
+*.user
+Thumbs.db

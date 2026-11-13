@@ -1,0 +1,105 @@
+<UserControl x:Class="CoreWatch.Pages.RegistryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Vis" />
+        <DataTemplate x:Key="IssueTemplate">
+            <Grid Margin="0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding Selected, Mode=TwoWay}" IsEnabled="{Binding CanSelect}" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" Margin="16,0,12,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Reason}" Style="{StaticResource T.Label}" Margin="0,2,0,0" ToolTip="{Binding Reason}" />
+                    <TextBlock Text="{Binding Location}" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" FontFamily="{StaticResource F.Mono}"
+                               FontSize="11.5" Margin="0,3,0,0" ToolTip="{Binding Location}" />
+                </StackPanel>
+                <Border Grid.Column="2" Style="{StaticResource Chip}" VerticalAlignment="Center" Margin="0,0,8,0" Visibility="{Binding Locked, Converter={StaticResource Vis}}"
+                        ToolTip="Restart CoreWatch as administrator to remove this">
+                    <TextBlock Text="Needs administrator" Style="{StaticResource T.Label}" FontSize="11.5" />
+                </Border>
+                <Button Grid.Column="3" Style="{StaticResource BtnIcon}" Content="&#xE8A7;" ToolTip="Open in Registry Editor" Tag="{Binding}" Click="OpenRegedit_Click" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Registry" Style="{StaticResource T.Page}" />
+            <TextBlock Style="{StaticResource T.Sub}" Margin="0,4,0,20"
+                       Text="Finds registry entries left behind by programs and files that are no longer there. Removing them tidies Windows up rather than speeding it up, and a backup is saved before anything is removed." />
+
+            <!-- Summary -->
+            <Border Style="{StaticResource Card}" Padding="22,20">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="TotalText" Style="{StaticResource T.Big}" Foreground="{StaticResource B.Accent}" Margin="0,0,16,0" Visibility="Collapsed" />
+                            <StackPanel Margin="0,0,0,5" VerticalAlignment="Bottom">
+                                <TextBlock x:Name="TotalLabel" Style="{StaticResource T.Card}" Text="Not scanned yet" />
+                                <TextBlock x:Name="TotalDetail" Style="{StaticResource T.Label}" Text="Scan to look for leftover entries. Nothing is changed until you press Fix." />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button x:Name="ScanButton" Style="{StaticResource BtnPrimary}" Content="Scan" MinWidth="104" Click="Scan_Click" />
+                            <Button x:Name="FixButton" Style="{StaticResource Btn}" Content="Fix selected" MinWidth="104" Margin="10,0,0,0" IsEnabled="False" Click="Fix_Click" />
+                        </StackPanel>
+                    </Grid>
+                    <ProgressBar x:Name="Busy" Height="4" Margin="0,18,0,0" Visibility="Collapsed" />
+
+                    <Border x:Name="AdminBar" Margin="0,18,0,0" Padding="14,10" CornerRadius="8" Background="{StaticResource B.CardAlt}" Visibility="Collapsed">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE72E;" Style="{StaticResource T.Icon}" FontSize="15" Margin="0,0,12,0" />
+                                <TextBlock x:Name="AdminText" Style="{StaticResource T.Label}" FontSize="12.5" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Style="{StaticResource Btn}" Content="Restart as administrator" HorizontalAlignment="Right" Click="Admin_Click" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <StackPanel x:Name="Groups" Margin="0,4,0,0" />
+
+            <!-- Backups -->
+            <TextBlock Text="Backups" Style="{StaticResource T.Card}" Margin="2,24,2,8" />
+            <Border Style="{StaticResource Card}" Padding="18,6">
+                <StackPanel>
+                    <ItemsControl x:Name="BackupList" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="&#xE81C;" Style="{StaticResource T.Icon}" FontSize="17" Margin="2,0,16,0" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource T.Label}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Style="{StaticResource Chip}" VerticalAlignment="Center" Margin="0,0,10,0" Visibility="{Binding Locked, Converter={StaticResource Vis}}">
+                                        <TextBlock Text="Needs administrator" Style="{StaticResource T.Label}" FontSize="11.5" />
+                                    </Border>
+                                    <Button Grid.Column="3" Style="{StaticResource Btn}" Content="Restore" MinWidth="88" Tag="{Binding}" Click="Restore_Click" VerticalAlignment="Center" />
+                                    <Button Grid.Column="4" Style="{StaticResource BtnIcon}" Content="&#xE838;" ToolTip="Show the backup file" Tag="{Binding}" Click="ShowBackup_Click" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="NoBackups" Style="{StaticResource T.Sub}" Margin="0,14" Text="No backups yet. One is saved automatically every time you fix something." />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" Margin="2,14,0,0" TextWrapping="Wrap" TextTrimming="None"
+                       Text="An entry is only listed when it names a full path on a built-in drive and Windows reports that path as not found. Anything on a network or removable drive, or that cannot be checked, is left alone. Backups are ordinary .reg files, so they also work without CoreWatch." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

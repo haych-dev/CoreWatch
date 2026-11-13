@@ -1,0 +1,73 @@
+<UserControl x:Class="CoreWatch.Pages.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <Grid Margin="32,4,32,32">
+        <Grid.ColumnDefinitions>
+            <!-- Left-aligned column that grows up to 900px; the second column absorbs the rest -->
+            <ColumnDefinition Width="100000*" MaxWidth="900" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="Settings" Style="{StaticResource T.Page}" Margin="0,0,0,20" />
+
+            <Border Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,24,0">
+                        <TextBlock Text="Refresh rate" Style="{StaticResource T.Card}" />
+                        <TextBlock Style="{StaticResource T.Sub}" Margin="0,4,0,0" Text="How often live readings update. Slower rates use less CPU and keep a longer history on the charts." />
+                    </StackPanel>
+                    <Border Grid.Column="1" VerticalAlignment="Center" Background="{StaticResource B.CardAlt}" CornerRadius="8" Padding="3">
+                        <StackPanel x:Name="RatePanel" Orientation="Horizontal">
+                            <RadioButton Style="{StaticResource Seg}" GroupName="rate" Content="0.5 s" Tag="500" Checked="Rate_Checked" />
+                            <RadioButton Style="{StaticResource Seg}" GroupName="rate" Content="1 s" Tag="1000" Checked="Rate_Checked" />
+                            <RadioButton Style="{StaticResource Seg}" GroupName="rate" Content="2 s" Tag="2000" Checked="Rate_Checked" />
+                            <RadioButton Style="{StaticResource Seg}" GroupName="rate" Content="5 s" Tag="5000" Checked="Rate_Checked" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                <StackPanel>
+                    <TextBlock Text="Cleaner" Style="{StaticResource T.Card}" Margin="0,0,0,10" />
+                    <Grid Margin="0,6">
+                        <StackPanel HorizontalAlignment="Left" MaxWidth="600">
+                            <TextBlock Text="Keep temp files from the last 24 hours" />
+                            <TextBlock Style="{StaticResource T.Label}" Margin="0,2,0,0" TextWrapping="Wrap" Text="Installers and running apps often still need their newest temp files." />
+                        </StackPanel>
+                        <CheckBox x:Name="SkipRecent" Style="{StaticResource Switch}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Option_Click" />
+                    </Grid>
+                    <Border Height="1" Background="{StaticResource B.Line}" Margin="0,10" />
+                    <Grid Margin="0,6">
+                        <StackPanel HorizontalAlignment="Left" MaxWidth="600">
+                            <TextBlock Text="Ask before cleaning" />
+                            <TextBlock Style="{StaticResource T.Label}" Margin="0,2,0,0" TextWrapping="Wrap" Text="Show what will be deleted and how much before anything is removed." />
+                        </StackPanel>
+                        <CheckBox x:Name="ConfirmClean" Style="{StaticResource Switch}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Option_Click" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,24,0">
+                        <TextBlock Text="Administrator mode" Style="{StaticResource T.Card}" />
+                        <TextBlock x:Name="AdminText" Style="{StaticResource T.Sub}" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Button x:Name="AdminButton" Grid.Column="1" Style="{StaticResource Btn}" Content="Restart as administrator" VerticalAlignment="Center" Click="Admin_Click" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                <StackPanel x:Name="About">
+                    <TextBlock Text="About" Style="{StaticResource T.Card}" Margin="0,0,0,6" />
+                </StackPanel>
+            </Border>
+            <Button Style="{StaticResource BtnGhost}" Content="Open settings folder" Foreground="{StaticResource B.Accent}" HorizontalAlignment="Left" Margin="8,10,0,0" Click="OpenFolder_Click" />
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

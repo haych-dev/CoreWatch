@@ -1,0 +1,45 @@
+<UserControl x:Class="CoreWatch.Pages.GpuPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Graphics" Style="{StaticResource T.Page}" />
+            <TextBlock x:Name="SubTitle" Style="{StaticResource T.Sub}" Margin="0,4,0,20" Text="GPU load, video memory and sensors" />
+
+            <StackPanel x:Name="Cards" />
+
+            <Border x:Name="EmptyCard" Style="{StaticResource Card}" Visibility="Collapsed">
+                <TextBlock Style="{StaticResource T.Sub}" Text="No hardware graphics adapter was found on this PC." />
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="Video memory by app" Style="{StaticResource T.Card}" />
+                        <TextBlock x:Name="ProcSummary" Style="{StaticResource T.Label}" HorizontalAlignment="Right" />
+                    </Grid>
+                    <ItemsControl x:Name="ProcList" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="230" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="96" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" MaxWidth="170" />
+                                        <TextBlock Text="{Binding CountText}" Style="{StaticResource T.Label}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <ProgressBar Grid.Column="1" Value="{Binding Pct, Mode=OneWay}" Foreground="{StaticResource B.Vram}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SizeText}" HorizontalAlignment="Right" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="ProcEmpty" Style="{StaticResource T.Sub}" Text="No app is holding dedicated video memory right now." Visibility="Collapsed" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

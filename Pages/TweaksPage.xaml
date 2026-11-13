@@ -1,0 +1,110 @@
+<UserControl x:Class="CoreWatch.Pages.TweaksPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Vis" />
+        <DataTemplate x:Key="TweakTemplate">
+            <Grid Margin="0,13" Visibility="{Binding Available, Converter={StaticResource Vis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,28,0">
+                    <WrapPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <Border Style="{StaticResource Chip}" Background="{StaticResource B.AccentSoft}" Margin="0,1,6,1">
+                            <TextBlock Text="{Binding Gain}" FontSize="11.5" Foreground="{StaticResource B.Accent}" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}" Margin="0,1,6,1" Visibility="{Binding Recommended, Converter={StaticResource Vis}}">
+                            <TextBlock Text="Recommended" Style="{StaticResource T.Label}" FontSize="11.5" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}" Margin="0,1,6,1" Visibility="{Binding HasNote, Converter={StaticResource Vis}}">
+                            <TextBlock Text="{Binding Note}" Style="{StaticResource T.Label}" FontSize="11.5" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}" Margin="0,1,6,1" Visibility="{Binding Locked, Converter={StaticResource Vis}}"
+                                ToolTip="Restart CoreWatch as administrator to change this">
+                            <TextBlock Text="Needs administrator" Style="{StaticResource T.Label}" FontSize="11.5" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}" Margin="0,1,6,1" Visibility="{Binding Touched, Converter={StaticResource Vis}}"
+                                ToolTip="CoreWatch switched this off and kept the original settings, so it can be put back exactly">
+                            <TextBlock Text="Switched off here" Style="{StaticResource T.Label}" FontSize="11.5" Foreground="{StaticResource B.Good}" />
+                        </Border>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding Description}" Style="{StaticResource T.Label}" TextWrapping="Wrap" TextTrimming="None" LineHeight="18"
+                               Margin="0,5,0,0" MaxWidth="860" HorizontalAlignment="Left" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding StateText}" Style="{StaticResource T.Label}" FontSize="13" VerticalAlignment="Center" Margin="0,0,14,0" />
+                <CheckBox Grid.Column="2" Style="{StaticResource Switch}" IsChecked="{Binding IsOn, Mode=OneWay}" IsEnabled="{Binding CanToggle}"
+                          Tag="{Binding}" Click="Toggle_Click" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Tweaks" Style="{StaticResource T.Page}" />
+            <TextBlock Style="{StaticResource T.Sub}" Margin="0,4,0,20"
+                       Text="Switch off Windows features you don't use to cut background work. Every switch can be flipped back, and CoreWatch keeps the original settings so undo is exact." />
+
+            <!-- Summary -->
+            <Border Style="{StaticResource Card}" Padding="22,20">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="OffCount" Style="{StaticResource T.Big}" Foreground="{StaticResource B.Accent}" Margin="0,0,16,0" Text="0" />
+                            <StackPanel Margin="0,0,0,5" VerticalAlignment="Bottom">
+                                <TextBlock x:Name="OffLabel" Style="{StaticResource T.Card}" Text="Checking Windows…" />
+                                <TextBlock x:Name="OffDetail" Style="{StaticResource T.Label}" Text=" " />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button x:Name="RecommendedButton" Style="{StaticResource BtnPrimary}" Content="Switch off recommended" Click="Recommended_Click" IsEnabled="False" />
+                            <Button x:Name="UndoButton" Style="{StaticResource Btn}" Content="Undo all changes" Margin="10,0,0,0" Click="Undo_Click" IsEnabled="False" />
+                        </StackPanel>
+                    </Grid>
+                    <ProgressBar x:Name="Busy" Height="4" Margin="0,18,0,0" Visibility="Collapsed" />
+
+                    <Border x:Name="AdminBar" Margin="0,18,0,0" Padding="14,10" CornerRadius="8" Background="{StaticResource B.CardAlt}" Visibility="Collapsed">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE72E;" Style="{StaticResource T.Icon}" FontSize="15" Margin="0,0,12,0" />
+                                <TextBlock x:Name="AdminText" Style="{StaticResource T.Label}" FontSize="12.5" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Style="{StaticResource Btn}" Content="Restart as administrator" HorizontalAlignment="Right" Click="Admin_Click" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <StackPanel x:Name="Groups" />
+
+            <!-- Windows' own dialogs -->
+            <TextBlock Text="More in Windows" Style="{StaticResource T.Card}" Margin="2,22,2,8" />
+            <Border Style="{StaticResource Card}" Padding="18,6">
+                <StackPanel>
+                    <Grid Margin="0,11">
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,180,0">
+                            <TextBlock Text="Optional Windows features" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource T.Label}" TextWrapping="Wrap" TextTrimming="None" Margin="0,4,0,0"
+                                       Text="Remove built-in components such as Hyper-V, Windows Sandbox, legacy media and print features. Windows may ask to restart." />
+                        </StackPanel>
+                        <Button Style="{StaticResource Btn}" Content="Open" MinWidth="92" HorizontalAlignment="Right" VerticalAlignment="Center" Tag="OptionalFeatures.exe" Click="Open_Click" />
+                    </Grid>
+                    <Border Height="1" Background="{StaticResource B.Line}" />
+                    <Grid Margin="0,11">
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,180,0">
+                            <TextBlock Text="Visual effects, one by one" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource T.Label}" TextWrapping="Wrap" TextTrimming="None" Margin="0,4,0,0"
+                                       Text="Windows' Performance Options list every shadow, fade and thumbnail effect individually." />
+                        </StackPanel>
+                        <Button Style="{StaticResource Btn}" Content="Open" MinWidth="92" HorizontalAlignment="Right" VerticalAlignment="Center" Tag="SystemPropertiesPerformance.exe" Click="Open_Click" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" Margin="2,14,0,0" TextWrapping="Wrap" TextTrimming="None"
+                       Text="CoreWatch leaves security features alone: Microsoft Defender, Windows Update, the firewall, SmartScreen and User Account Control are not on this page." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

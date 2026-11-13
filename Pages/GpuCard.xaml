@@ -1,0 +1,66 @@
+<UserControl x:Class="CoreWatch.Pages.GpuCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:CoreWatch.Controls">
+    <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+        <StackPanel>
+            <Grid Margin="0,0,0,16">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="NameText" FontFamily="{StaticResource F.Display}" FontSize="18" FontWeight="SemiBold" />
+                    <Border Style="{StaticResource Chip}" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="VendorText" Style="{StaticResource T.Label}" FontSize="11.5" />
+                    </Border>
+                    <Border x:Name="KindChip" Style="{StaticResource Chip}" Margin="8,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="KindText" Style="{StaticResource T.Label}" FontSize="11.5" />
+                    </Border>
+                </StackPanel>
+                <TextBlock x:Name="DriverText" Style="{StaticResource T.Label}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition Width="240" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Gauges -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel>
+                        <Grid>
+                            <c:RingGauge x:Name="UtilGauge" Width="118" Height="118" Color="{StaticResource C.Gpu}" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="UtilText" FontFamily="{StaticResource F.Display}" FontSize="26" FontWeight="SemiBold" HorizontalAlignment="Center" Text="0%" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Utilization" Style="{StaticResource T.Label}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                    </StackPanel>
+                    <StackPanel Margin="22,0,0,0">
+                        <Grid>
+                            <c:RingGauge x:Name="VramGauge" Width="118" Height="118" Color="{StaticResource C.Vram}" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="VramText" FontFamily="{StaticResource F.Display}" FontSize="26" FontWeight="SemiBold" HorizontalAlignment="Center" Text="0%" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Dedicated memory" Style="{StaticResource T.Label}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- History -->
+                <DockPanel Grid.Column="2">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource B.Gpu}" VerticalAlignment="Center" />
+                        <TextBlock Text="Utilization" Style="{StaticResource T.Label}" Margin="7,0,18,0" />
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource B.Vram}" VerticalAlignment="Center" />
+                        <TextBlock Text="Dedicated memory" Style="{StaticResource T.Label}" Margin="7,0,0,0" />
+                    </StackPanel>
+                    <c:LineChart x:Name="Chart" MinHeight="132" />
+                </DockPanel>
+
+                <StackPanel x:Name="Stats" Grid.Column="4" VerticalAlignment="Center" />
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>
