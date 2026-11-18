@@ -29,6 +29,7 @@ public partial class InstallPage : UserControl, IPage
         if (_loaded || WingetService.Exe == null) return;
         _loaded = true;
         _ = LoadInstalled();
+        if (App.DevTab?.Contains("updates") == true) CheckUpdates_Click(this, new RoutedEventArgs());
     }
 
     async Task LoadInstalled()
@@ -90,7 +91,7 @@ public partial class InstallPage : UserControl, IPage
         UpdateButton.IsEnabled = !_busy;
     }
 
-    void SetBusy(bool busy, bool canStop = false)
+    void SetBusy(bool busy, bool canStop = false, bool showLog = true)
     {
         _busy = busy;
         _stop = false;
@@ -98,8 +99,9 @@ public partial class InstallPage : UserControl, IPage
         Busy.IsIndeterminate = busy;
         StopButton.Visibility = busy && canStop ? Visibility.Visible : Visibility.Collapsed;
         StopButton.IsEnabled = true;
-        if (busy) { LogPanel.Visibility = Visibility.Visible; Log.Clear(); }
+        if (busy && showLog) { LogPanel.Visibility = Visibility.Visible; Log.Clear(); }
         UpdateSummary();
+        UpdateUpgradeButtons();
     }
 
     async void Install_Click(object sender, RoutedEventArgs e)
@@ -146,21 +148,84 @@ public partial class InstallPage : UserControl, IPage
         StopButton.IsEnabled = false;
     }
 
-    async void UpdateAll_Click(object sender, RoutedEventArgs e)
+    // ───────── Updates for installed apps ─────────
+    List<UpgradeItem> _upgrades = [];
+
+    async void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
         if (_busy) return;
-        bool ok = await MainWindow.Instance.Confirm("Update every app winget can update?",
-            "This updates all installed apps that have a newer version available, not only the ones on this page. Apps that are open may be closed by their installers.", "Update all");
+        SetBusy(true, showLog: false);
+        SummaryTitle.Text = "Checking for updates…";
+        SummaryDetail.Text = "Asking winget which installed apps have a newer version.";
+        try
+        {
+            foreach (var item in _upgrades) item.PropertyChanged -= Upgrade_Changed;
+            _upgrades = await WingetService.Upgrades();
+            foreach (var item in _upgrades) item.PropertyChanged += Upgrade_Changed;
+            UpdateList.ItemsSource = _upgrades;
+            UpdatesPanel.Visibility = Visibility.Visible;
+            UpdatesNote.Visibility = _upgrades.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            UpdatesNote.Text = "Every app winget knows about is up to date.";
+            UpdatesTitle.Text = _upgrades.Count == 0 ? "Updates" : $"Updates ({_upgrades.Count})";
+            SelectAllButton.Visibility = _upgrades.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        catch (Exception ex) { MainWindow.Instance.Toast("Could not check for updates: " + ex.Message, true); }
+        finally { SetBusy(false); }
+        if (_upgrades.Count > 0) UpdatesPanel.BringIntoView();
+    }
+
+    void Upgrade_Changed(object? sender, PropertyChangedEventArgs e) => UpdateUpgradeButtons();
+
+    void UpdateUpgradeButtons()
+    {
+        int selected = _upgrades.Count(u => u.Selected && !u.Done);
+        UpdateSelectedButton.IsEnabled = !_busy && selected > 0;
+        UpdateSelectedButton.Style = Ui.Style(selected > 0 ? "BtnPrimary" : "Btn");
+        UpdateSelectedButton.Content = selected > 0 ? $"Update {selected} selected" : "Update selected";
+        SelectAllButton.IsEnabled = !_busy;
+    }
+
+    void SelectAllUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        bool all = _upgrades.Where(u => !u.Done).All(u => u.Selected);
+        foreach (var item in _upgrades.Where(u => !u.Done)) item.Selected = !all;
+    }
+
+    async void UpdateSelected_Click(object sender, RoutedEventArgs e)
+    {
+        var targets = _upgrades.Where(u => u.Selected && !u.Done).ToList();
+        if (_busy || targets.Count == 0) return;
+        string names = string.Join("\n", targets.Take(12).Select(a => $"•  {a.Name}  ({a.Versions})")) + (targets.Count > 12 ? $"\n•  and {targets.Count - 12} more" : "");
+        bool ok = await MainWindow.Instance.Confirm($"Update {targets.Count} {(targets.Count == 1 ? "app" : "apps")}?",
+            names + "\n\nEach update is downloaded from its publisher. Apps that are open may be closed by their installers.", "Update");
         if (!ok) return;
 
-        SetBusy(true);
-        SummaryTitle.Text = "Updating apps…";
-        SummaryDetail.Text = "This can take several minutes.";
-        int code;
-        try { code = await WingetService.Run(WingetService.UpgradeAllArgs, Log.Append); }
-        catch (Exception ex) { Log.Append(ex.Message); code = -1; }
+        SetBusy(true, canStop: targets.Count > 1);
+        int done = 0;
+        var failed = new List<string>();
+        try
+        {
+            for (int i = 0; i < targets.Count && !_stop; i++)
+            {
+                var app = targets[i];
+                SummaryTitle.Text = $"Updating {app.Name}…";
+                SummaryDetail.Text = $"App {i + 1} of {targets.Count}";
+                app.Failed = false;
+                app.Busy = true;
+                app.Status = "Updating…";
+                Log.Append($"▶ {app.Name}  ({app.Id})  {app.Versions}");
+                int code;
+                try { code = await WingetService.Run(WingetService.UpgradeArgs(app.Id), Log.Append); }
+                catch (Exception ex) { Log.Append(ex.Message); code = -1; }
+                app.Busy = false;
+                // 0x8A15002B: winget found nothing newer to install after all.
+                if (code == 0 || code == unchecked((int)0x8A15002B)) { app.Status = code == 0 ? "Updated" : "Up to date"; app.Done = true; done++; }
+                else { app.Failed = true; app.Status = "Failed"; failed.Add(app.Name); Log.Append($"{app.Name} was not updated (code 0x{code:X8})."); }
+            }
+        }
         finally { SetBusy(false); }
-        if (code == 0) MainWindow.Instance.Toast("Apps are up to date.");
-        else MainWindow.Instance.Toast("Some apps could not be updated. See the output for details.", true);
+
+        if (failed.Count > 0) MainWindow.Instance.Toast($"Updated {done}. Could not update: {string.Join(", ", failed)}. See the output for why.", true);
+        else MainWindow.Instance.Toast($"Updated {done} {(done == 1 ? "app" : "apps")}.");
     }
 }

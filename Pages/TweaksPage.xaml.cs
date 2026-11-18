@@ -61,6 +61,7 @@ public partial class TweaksPage : UserControl, IPage
         RecommendedButton.IsEnabled = !_busy && RecommendedTargets().Count > 0;
         RecommendedButton.Style = Ui.Style(RecommendedTargets().Count > 0 ? "BtnPrimary" : "Btn");
         UndoButton.IsEnabled = !_busy && UndoTargets().Count > 0;
+        ExportButton.IsEnabled = ImportButton.IsEnabled = !_busy;
 
         AdminBar.Visibility = locked > 0 ? Visibility.Visible : Visibility.Collapsed;
         AdminText.Text = $"{locked} of these change settings for the whole PC and need administrator rights.";
@@ -159,6 +160,60 @@ public partial class TweaksPage : UserControl, IPage
         bool ok = await MainWindow.Instance.Confirm($"Switch {targets.Count} {(targets.Count == 1 ? "feature" : "features")} back on?",
             Names(targets) + "\n\nEach one goes back to the setting it had before CoreWatch changed it.", "Undo changes");
         if (ok) await ApplyMany(targets, true);
+    }
+
+    // ───────── Profiles ─────────
+    const string ProfileFilter = "CoreWatch tweak profile (*.json)|*.json";
+
+    void Export_Click(object sender, RoutedEventArgs e)
+    {
+        int off = _tweaks.Count(t => t.Available && !t.IsOn);
+        if (off == 0) { MainWindow.Instance.Toast("Nothing is switched off yet, so there is nothing to save.", true); return; }
+        var dialog = new Microsoft.Win32.SaveFileDialog { Title = "Save tweak profile", Filter = ProfileFilter, FileName = "CoreWatch tweaks.json" };
+        if (dialog.ShowDialog() != true) return;
+        try
+        {
+            System.IO.File.WriteAllText(dialog.FileName, TweakProfile.Export(_tweaks));
+            MainWindow.Instance.Toast($"Saved a profile with {off} {(off == 1 ? "feature" : "features")} switched off.");
+        }
+        catch (Exception ex) { MainWindow.Instance.Toast("The profile could not be saved: " + ex.Message, true); }
+    }
+
+    async void Import_Click(object sender, RoutedEventArgs e)
+    {
+        if (_busy) return;
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = "Load tweak profile", Filter = ProfileFilter };
+        if (dialog.ShowDialog() != true) return;
+        string json;
+        try { json = System.IO.File.ReadAllText(dialog.FileName); }
+        catch (Exception ex) { MainWindow.Instance.Toast("The file could not be read: " + ex.Message, true); return; }
+        await ApplyProfile(json, confirm: true);
+    }
+
+    /// <summary>Switches off the features a profile lists. A profile never switches anything back on.</summary>
+    public async Task<string> ApplyProfile(string json, bool confirm)
+    {
+        if (TweakProfile.Parse(json) is not { } ids)
+        {
+            MainWindow.Instance.Toast("That file is not a CoreWatch tweak profile.", true);
+            return "not a profile";
+        }
+        var listed = _tweaks.Where(t => ids.Contains(t.Id) && t.Available).ToList();
+        var targets = listed.Where(t => t.IsOn && !t.Locked).ToList();
+        int locked = listed.Count(t => t.IsOn && t.Locked), already = listed.Count(t => !t.IsOn), unknown = ids.Count - listed.Count;
+        string notes = (already > 0 ? $"\n{already} already off here." : "") +
+                       (locked > 0 ? $"\n{locked} need administrator rights and are skipped." : "") +
+                       (unknown > 0 ? $"\n{unknown} not available on this PC." : "");
+        if (targets.Count == 0)
+        {
+            MainWindow.Instance.Toast("The profile has nothing left to switch off here." + notes.Replace("\n", " "), locked > 0);
+            return $"nothing to do: already={already}, locked={locked}, unknown={unknown}";
+        }
+        if (confirm && !await MainWindow.Instance.Confirm($"Switch off {targets.Count} {(targets.Count == 1 ? "feature" : "features")} from this profile?",
+                Names(targets) + (notes.Length > 0 ? "\n" + notes : "") + "\n\nA profile only switches features off. You can switch any of them back on here.", "Switch off"))
+            return "cancelled";
+        await ApplyMany(targets, false);
+        return $"applied {targets.Count}: already={already}, locked={locked}, unknown={unknown}";
     }
 
     void Admin_Click(object sender, RoutedEventArgs e)

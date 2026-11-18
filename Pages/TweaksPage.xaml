@@ -61,6 +61,10 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Button x:Name="RecommendedButton" Style="{StaticResource BtnPrimary}" Content="Switch off recommended" Click="Recommended_Click" IsEnabled="False" />
                             <Button x:Name="UndoButton" Style="{StaticResource Btn}" Content="Undo all changes" Margin="10,0,0,0" Click="Undo_Click" IsEnabled="False" />
+                            <Button x:Name="ExportButton" Style="{StaticResource BtnIcon}" Content="&#xE74E;" Margin="10,0,0,0" Click="Export_Click" IsEnabled="False"
+                                    ToolTip="Save profile: write the list of features that are off to a file" />
+                            <Button x:Name="ImportButton" Style="{StaticResource BtnIcon}" Content="&#xE8E5;" Click="Import_Click" IsEnabled="False"
+                                    ToolTip="Load profile: switch off the features listed in a saved file" />
                         </StackPanel>
                     </Grid>
                     <ProgressBar x:Name="Busy" Height="4" Margin="0,18,0,0" Visibility="Collapsed" />

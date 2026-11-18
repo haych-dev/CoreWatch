@@ -208,6 +208,7 @@ public partial class DashboardPage : UserControl, IPage
         try
         {
             report = await RefreshService.Run(stage => RefreshDetail.Text = stage, preview);
+            if (!preview) MaintenanceService.Record(report, automatic: false);
             RefreshIcon.Text = "";
             RefreshIcon.Foreground = Ui.Brush("B.Good");
             RefreshTitle.Text = preview ? "Refresh preview" : "Refresh complete";

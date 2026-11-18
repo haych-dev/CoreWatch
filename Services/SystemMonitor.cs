@@ -106,6 +106,7 @@ public sealed class SystemMonitor
     // Network state
     long _prevRx, _prevTx;
     bool _netPrimed;
+    HashSet<string>? _realNics;
     int _tick;
     string _netName = "", _netAddr = "";
     long _netSpeed;
@@ -355,10 +356,28 @@ public sealed class SystemMonitor
         {
             long rx = 0, tx = 0;
             NetworkInterface? primary = null;
-            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            var all = NetworkInterface.GetAllNetworkInterfaces();
+
+            // Windows lists packet filters and schedulers as extra adapters that repeat the real adapter's counters.
+            // Only adapters with an address are real; the set is refreshed every 20 samples.
+            if (_realNics == null || _tick % 20 == 1)
             {
-                if (nic.OperationalStatus != OperationalStatus.Up) continue;
-                if (nic.NetworkInterfaceType is NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel) continue;
+                var real = new HashSet<string>();
+                foreach (var nic in all)
+                {
+                    try
+                    {
+                        if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel)
+                            && nic.GetIPProperties().UnicastAddresses.Count > 0) real.Add(nic.Id);
+                    }
+                    catch { }
+                }
+                _realNics = real;
+            }
+
+            foreach (var nic in all)
+            {
+                if (nic.OperationalStatus != OperationalStatus.Up || !_realNics.Contains(nic.Id)) continue;
                 var st = nic.GetIPStatistics();
                 rx += st.BytesReceived;
                 tx += st.BytesSent;

@@ -586,3 +586,24 @@ public static class TweakService
         return string.Join(Environment.NewLine, log);
     }
 }
+
+/// <summary>A saved list of the features switched off on the Tweaks page, to apply the same choices on another PC.</summary>
+public static class TweakProfile
+{
+    sealed record Data(string App, string Kind, int Version, DateTime Created, List<string> Off);
+
+    public static string Export(IEnumerable<Tweak> tweaks) => JsonSerializer.Serialize(
+        new Data("CoreWatch", "tweak-profile", 1, DateTime.Now, tweaks.Where(t => t.Available && !t.IsOn).Select(t => t.Id).ToList()),
+        new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+    /// <summary>The tweak ids a profile switches off, or null when the text is not a CoreWatch tweak profile.</summary>
+    public static List<string>? Parse(string json)
+    {
+        try
+        {
+            var file = JsonSerializer.Deserialize<Data>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return file is { Kind: "tweak-profile", Off: not null } ? file.Off.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() : null;
+        }
+        catch { return null; }
+    }
+}

@@ -26,6 +26,13 @@
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom">
+                    <Button x:Name="UpdateChip" Style="{StaticResource Btn}" Visibility="Collapsed" Margin="4,0,4,8" Padding="12,8" HorizontalContentAlignment="Left"
+                            Click="UpdateChip_Click" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Open the download page">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE896;" Style="{StaticResource T.Icon}" FontSize="14" Foreground="{StaticResource B.Accent}" Margin="0,0,10,0" />
+                            <TextBlock x:Name="UpdateChipText" Text="Update available" FontSize="12.5" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <RadioButton x:Name="NavSettings" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE713;" Content="Settings" />
                     <Border Margin="4,12,4,0" Padding="12,10" CornerRadius="8" Background="{StaticResource B.Card}" BorderBrush="{StaticResource B.Line}" BorderThickness="1"
                             WindowChrome.IsHitTestVisibleInChrome="True">
@@ -47,16 +54,22 @@
                     <RadioButton x:Name="NavMemory" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE950;" Content="Memory" />
                     <RadioButton x:Name="NavGpu" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE7F4;" Content="Graphics" />
                     <RadioButton x:Name="NavProcesses" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE9F5;" Content="Processes" />
+                    <RadioButton x:Name="NavNetwork" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE968;" Content="Network" />
+                    <RadioButton x:Name="NavHistory" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE81C;" Content="History" />
                     <TextBlock Text="MAINTAIN" Style="{StaticResource T.Label}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource B.Faint}" Margin="14,18,0,6" />
                     <RadioButton x:Name="NavStorage" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEDA2;" Content="Storage" />
+                    <RadioButton x:Name="NavDuplicates" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE8C8;" Content="Duplicates" />
                     <RadioButton x:Name="NavCleaner" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEA99;" Content="Cleaner" />
                     <RadioButton x:Name="NavStartup" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE7E8;" Content="Startup" />
+                    <RadioButton x:Name="NavServices" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEA86;" Content="Services" />
                     <RadioButton x:Name="NavTweaks" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEC4A;" Content="Tweaks" />
                     <RadioButton x:Name="NavRegistry" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE90F;" Content="Registry" />
                     <RadioButton x:Name="NavApps" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE71D;" Content="Apps" />
                     <TextBlock Text="TOOLS" Style="{StaticResource T.Label}" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource B.Faint}" Margin="14,18,0,6" />
                     <RadioButton x:Name="NavInstall" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE896;" Content="Install" />
                     <RadioButton x:Name="NavToolbox" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xEC7A;" Content="Toolbox" />
+                    <RadioButton x:Name="NavPower" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE945;" Content="Power" />
+                    <RadioButton x:Name="NavReliability" Style="{StaticResource Nav}" GroupName="nav" Tag="&#xE95E;" Content="Reliability" />
                 </StackPanel>
                 </ScrollViewer>
             </DockPanel>

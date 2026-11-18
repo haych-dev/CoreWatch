@@ -29,6 +29,9 @@
                 </Grid>
             </Border>
 
+            <!-- Background, alerts, scheduled maintenance and updates are built in code -->
+            <StackPanel x:Name="Extra" />
+
             <Border Style="{StaticResource Card}" Margin="0,12,0,0">
                 <StackPanel>
                     <TextBlock Text="Cleaner" Style="{StaticResource T.Card}" Margin="0,0,0,10" />

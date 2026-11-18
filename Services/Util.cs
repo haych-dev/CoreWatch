@@ -87,7 +87,7 @@ public static class Sys
         {
             var exe = Environment.ProcessPath;
             if (exe == null) return false;
-            Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true, Verb = "runas", Arguments = page != null ? $"--page {page}" : "" });
+            Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true, Verb = "runas", Arguments = "--restarted" + (page != null ? $" --page {page}" : "") });
             Application.Current.Shutdown();
             return true;
         }

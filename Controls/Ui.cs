@@ -31,6 +31,15 @@ public static class Ui
     }
 }
 
+/// <summary>Collapses an element when the bound value is true.</summary>
+public sealed class InverseVisibility : System.Windows.Data.IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) =>
+        value is true ? Visibility.Collapsed : Visibility.Visible;
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) => throw new NotSupportedException();
+}
+
 /// <summary>Card with a ring gauge, a centred percentage and a detail line.</summary>
 public sealed class GaugeCard : Border
 {

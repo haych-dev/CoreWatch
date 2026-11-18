@@ -1,0 +1,120 @@
+<UserControl x:Class="CoreWatch.Pages.NetworkPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:CoreWatch.Controls">
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="32,4,32,32" MaxWidth="1560">
+            <TextBlock Text="Network" Style="{StaticResource T.Page}" />
+            <TextBlock x:Name="SubTitle" Style="{StaticResource T.Sub}" Margin="0,4,0,20" Text="—" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="7*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Adapter -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="&#xE968;" Style="{StaticResource T.Icon}" Foreground="{StaticResource B.Net}" FontSize="18" Margin="0,0,10,0" />
+                            <TextBlock x:Name="AdapterName" Text="No connection" Style="{StaticResource T.Card}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel x:Name="AdapterFacts" />
+                        <TextBlock x:Name="OtherAdapters" Style="{StaticResource T.Label}" TextWrapping="Wrap" TextTrimming="None" Margin="0,8,0,0" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Throughput -->
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" MinHeight="170" />
+                        </Grid.RowDefinitions>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Traffic" Style="{StaticResource T.Card}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Ellipse Width="8" Height="8" Fill="{StaticResource B.Net}" VerticalAlignment="Center" Margin="0,1,7,0" />
+                                <TextBlock Text="Down" Style="{StaticResource T.Label}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="DownText" FontWeight="SemiBold" Margin="8,0,20,0" MinWidth="76" Text="—" />
+                                <Ellipse Width="8" Height="8" Fill="{StaticResource B.Disk}" VerticalAlignment="Center" Margin="0,1,7,0" />
+                                <TextBlock Text="Up" Style="{StaticResource T.Label}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="UpText" FontWeight="SemiBold" Margin="8,0,0,0" MinWidth="76" Text="—" />
+                            </StackPanel>
+                        </Grid>
+                        <c:LineChart x:Name="Chart" Grid.Row="1" />
+                        <TextBlock x:Name="ScaleText" Grid.Row="1" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" FontSize="11" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,2,0,0" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- DNS -->
+            <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel Margin="0,0,24,0" HorizontalAlignment="Left" MaxWidth="640">
+                            <TextBlock Text="DNS servers" Style="{StaticResource T.Card}" />
+                            <TextBlock x:Name="DnsText" Style="{StaticResource T.Sub}" Margin="0,4,0,0" Text="—" />
+                        </StackPanel>
+                        <StackPanel x:Name="DnsButtons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock x:Name="DnsNote" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" TextWrapping="Wrap" TextTrimming="None" Margin="0,12,0,0"
+                               Text="DNS turns website names into addresses. A public service can be faster than the one your internet provider hands out. Only IPv4 servers are changed, and the original setting is kept so it can be restored." />
+                </StackPanel>
+            </Border>
+
+            <!-- Apps -->
+            <TextBlock Text="Apps using the network" Style="{StaticResource T.Card}" Margin="2,24,2,8" />
+            <Border Style="{StaticResource Card}" Padding="8,4,4,8">
+                <DataGrid x:Name="AppTable" Height="270" PreviewMouseWheel="Inner_PreviewMouseWheel">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="App" Width="240" Binding="{Binding Process}" FontWeight="SemiBold" />
+                        <DataGridTextColumn Header="Connections" Width="120" Binding="{Binding Connections}" ElementStyle="{StaticResource Cell.Right}" HeaderStyle="{StaticResource Head.Right}" />
+                        <DataGridTextColumn Header="Listening ports" Width="130" Binding="{Binding Listening}" ElementStyle="{StaticResource Cell.Right}" HeaderStyle="{StaticResource Head.Right}" />
+                        <DataGridTextColumn Header="Connected to" Width="*" Binding="{Binding Remotes}" ElementStyle="{StaticResource Cell.Dim}" CanUserSort="False" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="6*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="5*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock x:Name="ConnectionTitle" Text="Open connections" Style="{StaticResource T.Card}" Margin="2,0,2,8" />
+                    <Border Style="{StaticResource Card}" Padding="8,4,4,8">
+                        <DataGrid x:Name="ConnectionTable" Height="360" PreviewMouseWheel="Inner_PreviewMouseWheel">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="App" Width="*" Binding="{Binding Process}" />
+                                <DataGridTextColumn Header="Remote address" Width="2*" Binding="{Binding RemoteText}" ElementStyle="{StaticResource Cell.Dim}" SortMemberPath="Remote" />
+                                <DataGridTextColumn Header="State" Width="110" Binding="{Binding State}" ElementStyle="{StaticResource Cell.Dim}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock x:Name="ListenerTitle" Text="Listening ports" Style="{StaticResource T.Card}" Margin="2,0,2,8" />
+                    <Border Style="{StaticResource Card}" Padding="8,4,4,8">
+                        <DataGrid x:Name="ListenerTable" Height="360" PreviewMouseWheel="Inner_PreviewMouseWheel">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Port" Width="92" Binding="{Binding Port}" FontWeight="SemiBold" />
+                                <DataGridTextColumn Header="Type" Width="70" Binding="{Binding Protocol}" ElementStyle="{StaticResource Cell.Dim}" />
+                                <DataGridTextColumn Header="App" Width="*" Binding="{Binding Process}" />
+                                <DataGridTextColumn Header="Reachable from" Width="130" Binding="{Binding Scope}" ElementStyle="{StaticResource Cell.Dim}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" Margin="2,14,0,0" TextWrapping="Wrap" TextTrimming="None"
+                       Text="A listening port is a door an app holds open for others to connect to. &quot;This PC only&quot; ports cannot be reached from the network. Windows does not share Wi-Fi names or signal strength unless Location services are on, so those are not shown." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

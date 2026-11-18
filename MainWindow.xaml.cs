@@ -42,18 +42,27 @@ public partial class MainWindow : Window
             ["memory"] = (NavMemory, () => new MemoryPage()),
             ["graphics"] = (NavGpu, () => new GpuPage()),
             ["processes"] = (NavProcesses, () => new ProcessesPage()),
+            ["network"] = (NavNetwork, () => new NetworkPage()),
+            ["history"] = (NavHistory, () => new HistoryPage()),
             ["storage"] = (NavStorage, () => new StoragePage()),
+            ["duplicates"] = (NavDuplicates, () => new DuplicatesPage()),
             ["cleaner"] = (NavCleaner, () => new CleanerPage()),
             ["startup"] = (NavStartup, () => new StartupPage()),
+            ["services"] = (NavServices, () => new ServicesPage()),
             ["tweaks"] = (NavTweaks, () => new TweaksPage()),
             ["registry"] = (NavRegistry, () => new RegistryPage()),
             ["apps"] = (NavApps, () => new AppsPage()),
             ["install"] = (NavInstall, () => new InstallPage()),
             ["toolbox"] = (NavToolbox, () => new ToolboxPage()),
+            ["power"] = (NavPower, () => new PowerPage()),
+            ["reliability"] = (NavReliability, () => new ReliabilityPage()),
             ["settings"] = (NavSettings, () => new SettingsPage()),
         };
         foreach (var (key, route) in _routes)
             route.Button.Checked += (_, _) => Show(key);
+
+        UpdateService.Changed += ShowUpdateChip;
+        ShowUpdateChip();
 
         if (Sys.IsAdmin)
         {
@@ -94,6 +103,7 @@ public partial class MainWindow : Window
         if (ReferenceEquals(Host.Content, page)) return;
 
         Host.Content = page;
+        _routes[key].Button.BringIntoView(); // the rail scrolls, so keep the selected entry in sight
         _current = page as IPage;
         SystemMonitor.Instance.WantProcesses = _current?.WantsProcesses ?? false;
         _current?.OnShown();
@@ -108,7 +118,34 @@ public partial class MainWindow : Window
     void OnSnapshot(Snapshot s)
     {
         MiniStats.Text = $"CPU {Fmt.Pct(s.CpuTotal)}   RAM {Fmt.Pct(s.MemPct)}" + (s.PrimaryGpu is { } g ? $"   GPU {Fmt.Pct(g.Utilization)}" : "");
-        if (WindowState != WindowState.Minimized) _current?.OnTick(s);
+        if (WindowState != WindowState.Minimized && IsVisible) _current?.OnTick(s);
+    }
+
+    // ───────── Update notice and closing to the notification area ─────────
+    void ShowUpdateChip()
+    {
+        bool show = UpdateService.UpdateAvailable;
+        UpdateChip.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        if (show) UpdateChipText.Text = $"Update to {UpdateService.Parse(Settings.Current.LatestVersion)?.ToString(3)}";
+    }
+
+    void UpdateChip_Click(object sender, RoutedEventArgs e) => Sys.ShellOpen(UpdateService.ReleasesUrl);
+
+    bool _trayHintShown;
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (Settings.Current.CloseToTray && App.Tray != null && !App.Exiting)
+        {
+            e.Cancel = true;
+            Hide();
+            if (!_trayHintShown)
+            {
+                _trayHintShown = true;
+                App.Tray.Notify("CoreWatch is still running", "It keeps watching from the notification area. Right-click the icon to exit.");
+            }
+        }
+        base.OnClosing(e);
     }
 
     // ───────── Toast ─────────
@@ -178,7 +215,7 @@ public partial class MainWindow : Window
         foreach (var key in _routes.Keys)
         {
             Navigate(key);
-            await Task.Delay(key is "overview" ? 4500 : key is "storage" or "cleaner" ? 9000 : key is "install" ? 20000 : 3200);
+            await Task.Delay(key is "overview" or "services" or "network" or "power" ? 4500 : key is "storage" or "cleaner" or "reliability" ? 9000 : key is "install" ? 20000 : 3200);
             Capture(Root, Path.Combine(folder, key + ".png"));
             // Pages taller than the window also get their whole scrolling content in one image.
             if (Host.Content is UserControl { Content: ScrollViewer { Content: FrameworkElement body } } && body.ActualHeight > Root.ActualHeight)

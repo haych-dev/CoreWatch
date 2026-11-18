@@ -58,7 +58,7 @@
                                 <TextBox x:Name="SearchBox" TextChanged="Search_Changed" />
                                 <TextBlock x:Name="SearchHint" Text="Filter apps" Style="{StaticResource T.Label}" Foreground="{StaticResource B.Faint}" FontSize="13" Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" />
                             </Grid>
-                            <Button x:Name="UpdateButton" Style="{StaticResource Btn}" Content="Update all apps" Click="UpdateAll_Click" />
+                            <Button x:Name="UpdateButton" Style="{StaticResource Btn}" Content="Check for updates" Click="CheckUpdates_Click" />
                             <Button x:Name="InstallButton" Style="{StaticResource Btn}" Content="Install selected" MinWidth="124" Margin="10,0,0,0" IsEnabled="False" Click="Install_Click" />
                             <Button x:Name="StopButton" Style="{StaticResource Btn}" Content="Stop after this app" Margin="10,0,0,0" Visibility="Collapsed" Click="Stop_Click" />
                         </StackPanel>
@@ -66,6 +66,53 @@
                     <ProgressBar x:Name="Busy" Height="4" Margin="0,16,0,0" Visibility="Collapsed" />
                 </StackPanel>
             </Border>
+
+            <!-- Updates for apps that are already installed -->
+            <StackPanel x:Name="UpdatesPanel" Visibility="Collapsed">
+                <Grid Margin="2,22,2,8">
+                    <TextBlock x:Name="UpdatesTitle" Text="Updates" Style="{StaticResource T.Card}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="SelectAllButton" Style="{StaticResource BtnGhost}" Content="Select all" Foreground="{StaticResource B.Accent}" Click="SelectAllUpdates_Click" />
+                        <Button x:Name="UpdateSelectedButton" Style="{StaticResource Btn}" Content="Update selected" Margin="8,0,0,0" IsEnabled="False" Click="UpdateSelected_Click" />
+                    </StackPanel>
+                </Grid>
+                <Border Style="{StaticResource Card}" Padding="18,4">
+                    <StackPanel>
+                        <ItemsControl x:Name="UpdateList" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,9">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="34" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="110" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox IsChecked="{Binding Selected, Mode=TwoWay}" IsEnabled="{Binding CanSelect}" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Id}" Style="{StaticResource T.Label}" FontSize="11.5" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding Versions}" Style="{StaticResource T.Label}" FontSize="12.5" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Status}" FontSize="11.5" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource T.Label}">
+                                                    <Setter Property="Foreground" Value="{StaticResource B.Accent}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Done}" Value="True"><Setter Property="Foreground" Value="{StaticResource B.Good}" /></DataTrigger>
+                                                        <DataTrigger Binding="{Binding Failed}" Value="True"><Setter Property="Foreground" Value="{StaticResource B.Bad}" /></DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="UpdatesNote" Style="{StaticResource T.Sub}" Margin="0,14" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
 
             <!-- Live output -->
             <StackPanel x:Name="LogPanel" Visibility="Collapsed">

@@ -4,6 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- Windows Forms is only used for the notification-area icon. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Platforms>x64</Platforms>
@@ -12,7 +14,7 @@
     <SelfContained>false</SelfContained>
     <AssemblyName>CoreWatch</AssemblyName>
     <RootNamespace>CoreWatch</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>CoreWatch</Product>
     <Description>System, memory, GPU and storage manager for Windows</Description>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -23,6 +25,12 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Keep WPF's type names unambiguous: Windows Forms types are always written out in full. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>

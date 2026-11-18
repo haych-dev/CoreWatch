@@ -161,6 +161,28 @@ public sealed class CatalogApp : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 }
 
+/// <summary>An installed app with a newer version available through winget.</summary>
+public sealed class UpgradeItem : INotifyPropertyChanged
+{
+    public required string Name { get; init; }
+    public required string Id { get; init; }
+    public required string Current { get; init; }
+    public required string Available { get; init; }
+    public string Versions => $"{Current}  →  {Available}";
+
+    bool _selected, _busy, _done, _failed;
+    string _status = "";
+    public bool Selected { get => _selected; set { _selected = value; Notify(); } }
+    public bool Busy { get => _busy; set { _busy = value; Notify(); } }
+    public bool Done { get => _done; set { _done = value; if (value) _selected = false; Notify(); } }
+    public bool Failed { get => _failed; set { _failed = value; Notify(); } }
+    public string Status { get => _status; set { _status = value; Notify(); } }
+    public bool CanSelect => !_busy && !_done;
+
+    void Notify() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+    public event PropertyChangedEventHandler? PropertyChanged;
+}
+
 public static class WingetService
 {
     /// <summary>winget.exe, or null when App Installer is not on this PC.</summary>
@@ -185,6 +207,49 @@ public static class WingetService
     public static string InstallArgs(string id) => $"install --id \"{id}\" --exact --silent --accept-package-agreements {Common}";
     public const string UpgradeAllArgs = "upgrade --all --silent --accept-package-agreements " + Common;
     public static string ShowArgs(string id) => $"show --id \"{id}\" --exact {Common}";
+
+    public static string UpgradeArgs(string id) => $"upgrade --id \"{id}\" --exact --silent --accept-package-agreements {Common}";
+    const string ListUpgradesArgs = "upgrade --include-unknown --accept-source-agreements " + Common;
+
+    /// <summary>Apps winget can update right now (read-only).</summary>
+    public static async Task<List<UpgradeItem>> Upgrades(CancellationToken ct = default)
+    {
+        var lines = new List<string>();
+        await CommandRunner.Run(Exe ?? throw new InvalidOperationException("winget is not available."), ListUpgradesArgs, lines.Add, ct);
+        return ParseUpgrades(lines);
+    }
+
+    /// <summary>
+    /// Reads winget's upgrade table. Columns are found from where the header words start, so this does not depend on
+    /// the display language: the second column is the id, the third the installed version, the fourth the new one.
+    /// </summary>
+    public static List<UpgradeItem> ParseUpgrades(IReadOnlyList<string> lines)
+    {
+        var items = new List<UpgradeItem>();
+        for (int i = 1; i < lines.Count; i++)
+        {
+            string rule = lines[i].Trim();
+            if (rule.Length < 20 || rule.Any(c => c != '-')) continue;
+
+            string header = lines[i - 1];
+            var starts = new List<int>();
+            for (int c = 0; c < header.Length; c++)
+                if (!char.IsWhiteSpace(header[c]) && (c == 0 || char.IsWhiteSpace(header[c - 1]))) starts.Add(c);
+            if (starts.Count < 4) continue;
+
+            for (int row = i + 1; row < lines.Count; row++)
+            {
+                string line = lines[row];
+                if (line.Trim().Length == 0 || line.Length <= starts[3]) break;
+                string Cell(int n) => line[starts[n]..(n + 1 < starts.Count ? Math.Min(starts[n + 1], line.Length) : line.Length)].Trim();
+                string id = Cell(1), current = Cell(2), available = Cell(3);
+                if (id.Length == 0 || id.Contains(' ') || !id.Contains('.') || available.Length == 0) continue;
+                if (items.Any(x => x.Id.Equals(id, StringComparison.OrdinalIgnoreCase))) continue;
+                items.Add(new UpgradeItem { Name = Cell(0).TrimEnd('…').Trim(), Id = id, Current = current, Available = available });
+            }
+        }
+        return items;
+    }
 
     /// <summary>Drops winget's spinner and progress-bar redraws, which are noise in a log.</summary>
     public static bool IsNoise(string line)
