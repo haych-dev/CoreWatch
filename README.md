@@ -8,10 +8,13 @@ A native Windows system manager: live monitoring of CPU, memory, GPU and disks, 
 
 Get the latest build from the [Releases page](https://github.com/haych-dev/CoreWatch/releases/latest):
 
-- **`CoreWatch-<version>-win-x64-standalone.exe`** runs on its own; nothing else to install.
-- **`CoreWatch-<version>-win-x64.exe`** is under 1 MB but needs the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
+- **`CoreWatch-<version>-win-x64-setup.exe`** is the installer. It adds a Start menu shortcut and an uninstaller, and needs nothing else. It installs for your account without an administrator prompt, or for all users if you choose that.
+- **`CoreWatch-<version>-win-x64-standalone.exe`** runs on its own without installing; nothing else is needed.
+- **`CoreWatch-<version>-win-x64.exe`** is about 1 MB but needs the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
 
-There is no installer: download the exe and run it. The exe is not code-signed, so Windows SmartScreen may show a warning the first time.
+The two plain exes need no installation: download and run. None of the files is code-signed, so Windows SmartScreen may show a warning the first time.
+
+Uninstalling keeps your settings, history and undo backups in `%AppData%\CoreWatch` unless you choose to delete them.
 
 ## What it does
 
@@ -87,6 +90,12 @@ Single-file executable:
 
 ```
 dotnet publish -c Release -p:PublishSingleFile=true --self-contained false -o publish
+```
+
+Installer, which needs [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`). The script is [installer/CoreWatch.iss](installer/CoreWatch.iss), and the result is written to `publish\`:
+
+```
+powershell -ExecutionPolicy Bypass -File tools\build-installer.ps1
 ```
 
 ## Credits
